@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="Names">
+        <item>Винник Владислав</item>
+        <item>Теплий Михайло</item>
+        <item>Рибак Богдан</item>
+        <item>Лещенко Іван</item>
+        <item>Сакуров Павло</item>
+        <item>Воловик Руслан</item>
+        <item>Кириченко Даша</item>
+        <item>Рябко Андрій</item>
+        <item>Ситник Євгеній</item>
+        <item>Химич Эдгар</item>
+        <item>Бочкарьова Альона</item>
+        <item>Мигаль Руслан</item>
+        <item>Смалько Ірина</item>
+        <item>Губський Валерій</item>
+        <item>Жданов Євген</item>
+        <item>Сергієнко Іван</item>
+        <item>Пахаренко Ігор</item>
+        <item>Сторчак Олександр</item>
+        <item>Піхманець Микола</item>
+        <item>Лимарь Володимир</item>
+    </string-array>
+    <string-array name="GitLinks">
+        <item>https://github.com/vlads0n</item>
+        <item>https://github.com/RedGeekPanda</item>
+        <item>https://github.com/BogdanRybak1996</item>
+        <item>https://github.com/ivleshch</item>
+        <item>https://github.com/sakurov</item>
+        <item>https://github.com/RuslanVolovyk</item>
+        <item>https://github.com/dashakdsr</item>
+        <item>https://github.com/RyabkoAndrew</item>
+        <item>https://github.com/YevheniiSytnyk</item>
+        <item>https://github.com/lyfm</item>
+        <item>https://github.com/HelenCool</item>
+        <item>https://github.com/rmigal</item>
+        <item>https://github.com/IraSmalko</item>
+        <item>https://github.com/gvv-ua</item>
+        <item>https://github.com/zhdanov-ek</item>
+        <item>https://github.com/dogfight81</item>
+        <item>https://github.com/IhorPakharenko</item>
+        <item>https://github.com/new15</item>
+        <item>https://github.com/NikPikhmanets</item>
+        <item>https://github.com/VovanNec</item>
+    </string-array>
+    <string-array name="GitLogins">
+        <item>vlads0n</item>
+        <item>RedGeekPanda</item>
+        <item>BogdanRybak1996</item>
+        <item>ivleshch</item>
+        <item>sakurov</item>
+        <item>RuslanVolovyk</item>
+        <item>dashakdsr</item>
+        <item>RyabkoAndrew</item>
+        <item>YevheniiSytnyk</item>
+        <item>lyfm</item>
+        <item>HelenCool</item>
+        <item>rmigal</item>
+        <item>IraSmalko</item>
+        <item>gvv-ua</item>
+        <item>zhdanov-ek</item>
+        <item>dogfight81</item>
+        <item>IhorPakharenko</item>
+        <item>new15</item>
+        <item>NikPikhmanets</item>
+        <item>VovanNec</item>
+    </string-array>
+    <string-array name="GoogleLinks">
+        <item>https://plus.google.com/117765348335292685488</item>
+        <item>https://plus.google.com/110313151428733681846</item>
+        <item>https://plus.google.com/103145064185261665176</item>
+        <item>https://plus.google.com/111088051831122657934</item>
+        <item>https://plus.google.com/108482088578879737406</item>
+        <item>https://plus.google.com/109719711261293841416</item>
+        <item>https://plus.google.com/103130382244571139113</item>
+        <item>https://plus.google.com/110288437168771810002</item>
+        <item>https://plus.google.com/101427598085441575303</item>
+        <item>https://plus.google.com/102197104589432395674</item>
+        <item>https://plus.google.com/107382407687723634701</item>
+        <item>https://plus.google.com/106331812587299981536</item>
+        <item>https://plus.google.com/113994208318508685327</item>
+        <item>https://plus.google.com/107910188078571144657</item>
+        <item>https://plus.google.com/113264746064942658029</item>
+        <item>https://plus.google.com/111389859649705526831</item>
+        <item>https://plus.google.com/108231952557339738781</item>
+        <item>https://plus.google.com/106553086375805780685</item>
+        <item>https://plus.google.com/110087894894730430086</item>
+        <item>https://plus.google.com/109227554979939957830</item>
+    </string-array>
+    <string-array name="GoogleIDs">
+        <item>117765348335292685488</item>
+        <item>110313151428733681846</item>
+        <item>103145064185261665176</item>
+        <item>111088051831122657934</item>
+        <item>108482088578879737406</item>
+        <item>109719711261293841416</item>
+        <item>103130382244571139113</item>
+        <item>110288437168771810002</item>
+        <item>101427598085441575303</item>
+        <item>102197104589432395674</item>
+        <item>107382407687723634701</item>
+        <item>106331812587299981536</item>
+        <item>113994208318508685327</item>
+        <item>107910188078571144657</item>
+        <item>113264746064942658029</item>
+        <item>111389859649705526831</item>
+        <item>108231952557339738781</item>
+        <item>106553086375805780685</item>
+        <item>110087894894730430086</item>
+        <item>109227554979939957830</item>
+    </string-array>
+</resources>
