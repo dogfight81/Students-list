@@ -1,5 +1,7 @@
 package ivan.studentlist;
 
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,10 +13,14 @@ import java.util.ArrayList;
 
 public class RecyclerActivity extends AppCompatActivity {
 
+    private HeadsetReceiver receiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler);
+
+        receiver = new HeadsetReceiver();
 
         String[] names = getResources().getStringArray(R.array.Names);
         String[] gitLogins = getResources().getStringArray(R.array.GitLogins);
@@ -29,6 +35,19 @@ public class RecyclerActivity extends AppCompatActivity {
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(this, studentsList);
         rvStudents.setLayoutManager(new LinearLayoutManager(this));
         rvStudents.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(receiver);
+        super.onPause();
     }
 
     @Override

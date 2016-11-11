@@ -4,5 +4,8 @@
     <item
         android:title="go to recycler"
         android:id="@+id/item_recycler"/>
+    <item
+        android:title="go to PhotoActivity"
+        android:id="@+id/item_photo"/>
 
 </menu>

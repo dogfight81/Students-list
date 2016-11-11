@@ -1,6 +1,7 @@
 package ivan.studentlist;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,18 +17,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public static final String TAG = "myTag";
     public static final String EXTRA_GIT_LOGIN = "gitLogin";
     public static final String  EXTRA_GOOGLE_ID = "googleID";
-    public static final String EXTRA_GIT_URL = "gitURL";
-    public static final String  EXTRA_GOOGLE_URL = "googleURL";
 
     private ListView lvStudents;
     private String[] gitLogins;
     private String[] googleIds;
 
+    private HeadsetReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        receiver = new HeadsetReceiver();
 
         String[] names = getResources().getStringArray(R.array.Names);
 
@@ -40,6 +42,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         lvStudents.setAdapter(adapter);
         lvStudents.setOnItemClickListener(this);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(receiver);
+        super.onPause();
     }
 
     @Override
@@ -58,9 +73,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.item_recycler) {
-            startActivity(new Intent(this, RecyclerActivity.class));
+
+        switch (item.getItemId()) {
+            case R.id.item_recycler:
+                startActivity(new Intent(this, RecyclerActivity.class));
+                break;
+            case R.id.item_photo:
+                startActivity(new Intent(this, PhotoActivity.class));
+                break;
         }
+
+
         return super.onOptionsItemSelected(item);
     }
 

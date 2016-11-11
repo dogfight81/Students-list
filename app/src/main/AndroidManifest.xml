@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ivan.studentlist">
+
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,24 +18,29 @@
             </intent-filter>
         </activity>
         <activity android:name=".RecyclerActivity" />
-        <activity android:name=".GitProfileActivity">
+        <activity
+            android:name=".GitProfileActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="github.com"/>
-                <data android:scheme="https"/>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="github.com" />
+                <data android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".GoogleProfileActivity">
+        <activity
+            android:name=".GoogleProfileActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="plus.google.com"/>
-                <data android:scheme="https"/>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="plus.google.com" />
+                <data android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity android:name=".PhotoActivity"></activity>
     </application>
 
 </manifest>
