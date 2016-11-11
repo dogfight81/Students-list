@@ -16,11 +16,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public static final String TAG = "myTag";
     public static final String EXTRA_GIT_LOGIN = "gitLogin";
     public static final String  EXTRA_GOOGLE_ID = "googleID";
+    public static final String EXTRA_GIT_URL = "gitURL";
+    public static final String  EXTRA_GOOGLE_URL = "googleURL";
 
     private ListView lvStudents;
-    private String[] names;
-    private String[] gitLinks;
-    private String[] googleLinks;
     private String[] gitLogins;
     private String[] googleIds;
 
@@ -30,14 +29,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        String[] names = getResources().getStringArray(R.array.Names);
+
         lvStudents = (ListView) findViewById(R.id.lv_students);
-        names = getResources().getStringArray(R.array.Names);
-        gitLinks = getResources().getStringArray(R.array.GitLinks);
-        googleLinks = getResources().getStringArray(R.array.GoogleLinks);
+
         gitLogins = getResources().getStringArray(R.array.GitLogins);
         googleIds = getResources().getStringArray(R.array.GoogleIDs);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item,R.id.tv_name, names);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item, R.id.tv_name, names);
         lvStudents.setAdapter(adapter);
         lvStudents.setOnItemClickListener(this);
 

@@ -1,104 +1,98 @@
 package ivan.studentlist;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.ImageView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class GoogleProfileActivity extends AppCompatActivity {
 
     public TextView tvName;
-    public ImageView ivAvatar;
+    public CircleImageView ivAvatar;
+    public String googleId;
+    public Button btnGoogle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_profile);
         tvName = (TextView) findViewById(R.id.tv_google_name);
-        ivAvatar = (ImageView) findViewById(R.id.iv_google_avatar);
-        GoogleTask task = new GoogleTask();
-        task.execute(getIntent().getStringExtra(MainActivity.EXTRA_GOOGLE_ID));
+        ivAvatar = (CircleImageView) findViewById(R.id.iv_google_avatar);
+        btnGoogle = (Button) findViewById(R.id.btn_google);
+
+        Intent intent = getIntent();
+        if (intent.hasExtra(MainActivity.EXTRA_GOOGLE_ID)) {
+            googleId = intent.getStringExtra(MainActivity.EXTRA_GOOGLE_ID);
+        } else if (intent.getData().getHost().equals("plus.google.com")) {
+            googleId = intent.getData().getLastPathSegment();
+        }
+        if (googleId != null) {
+            FetchGoogleDataTask task = new FetchGoogleDataTask(this);
+            task.execute(googleId);
+        }
+
     }
 
-    public class GoogleTask extends AsyncTask<String, Void, Object[]> {
+    public void onGoogleBtnClick(View view) {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://plus.google.com/u/0/" + googleId)));
+    }
+
+    public class FetchGoogleDataTask extends AsyncTask<String, Void, String[]> {
+
+        private Context context;
+
+        FetchGoogleDataTask(Context context) {
+            this.context = context;
+        }
 
         @Override
-        protected Object[] doInBackground(String... params) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String[] resultStr = null;
-            Bitmap bmp = null;
+        protected String[] doInBackground(String... params) {
+            String apiKey = "AIzaSyCBsEZKMpc5b9pDcBDphHFpmcWKEyCwrOI";
+            final String BASE_URL = "https://www.googleapis.com/plus/v1/people/" + params[0];
+            final String APIKEY_PARAM = "key";
+            Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                    .appendQueryParameter(APIKEY_PARAM, apiKey)
+                    .build();
 
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder().url(builtUri.toString()).build();
             try {
-                String apiKey = "AIzaSyCBsEZKMpc5b9pDcBDphHFpmcWKEyCwrOI";
-                final String BASE_URL = "https://www.googleapis.com/plus/v1/people/" + params[0];
-                final String APIKEY_PARAM = "key";
-                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                        .appendQueryParameter(APIKEY_PARAM, apiKey)
-                        .build();
-                URL url = new URL(builtUri.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) return null;
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-                if (buffer.length() == 0) {
-                    return null;
-                }
-                resultStr = getDataFromJson(buffer.toString());
-                url = new URL(resultStr[2]);
-                bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                Object[] resultObj = new Object[3];
-                resultObj[0] = resultStr[0];
-                resultObj[1] = resultStr[1];
-                resultObj[2] = bmp;
-                return resultObj;
-            } catch (IOException e) {
-                Log.e("AsyncTask", "Error ", e);
-                return null;
-            } catch (JSONException e) {
+                Response response = client.newCall(request).execute();
+                return getDataFromJson(response.body().string());
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e("AsyncTask", "Error ", e);
-                    }
-                }
             }
             return null;
         }
 
         @Override
-        protected void onPostExecute(Object[] resultObj) {
-            super.onPostExecute(resultObj);
-            tvName.setText(resultObj[0].toString());
-            ivAvatar.setImageBitmap((Bitmap) resultObj[2]);
+        protected void onPostExecute(String[] result) {
+            super.onPostExecute(result);
+            if (result != null) {
+                tvName.setText(result[0]);
+                Picasso.with(context).load(result[2]).into(ivAvatar);
+                btnGoogle.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(context, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+            }
         }
 
         private String[] getDataFromJson(String jsonStr) throws JSONException {

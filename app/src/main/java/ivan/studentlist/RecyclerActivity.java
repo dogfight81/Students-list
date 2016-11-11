@@ -11,26 +11,18 @@ import java.util.ArrayList;
 
 public class RecyclerActivity extends AppCompatActivity {
 
-    private String[] names;
-    private String[] gitLinks;
-    private String[] googleLinks;
-    private String[] gitLogins;
-    private String[] googleIds;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler);
 
-        names = getResources().getStringArray(R.array.Names);
-        gitLinks = getResources().getStringArray(R.array.GitLinks);
-        googleLinks = getResources().getStringArray(R.array.GoogleLinks);
-        gitLogins = getResources().getStringArray(R.array.GitLogins);
-        googleIds = getResources().getStringArray(R.array.GoogleIDs);
+        String[] names = getResources().getStringArray(R.array.Names);
+        String[] gitLogins = getResources().getStringArray(R.array.GitLogins);
+        String[] googleIds = getResources().getStringArray(R.array.GoogleIDs);
 
         ArrayList<Student> studentsList = new ArrayList<>();
         for (int i = 0; i < names.length; i++) {
-            studentsList.add(new Student(names[i], gitLinks[i], googleLinks[i], gitLogins[i], googleIds[i]));
+            studentsList.add(new Student(names[i], gitLogins[i], googleIds[i]));
         }
 
         RecyclerView rvStudents = (RecyclerView) findViewById(R.id.rv_students);

@@ -1,31 +1,36 @@
 package ivan.studentlist;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ImageView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class GitProfileActivity extends AppCompatActivity {
 
     TextView tvName;
     TextView tvLogin;
-    ImageView ivAvatar;
+    CircleImageView ivAvatar;
     String gitLink;
     String userName;
+    Button btnGitHub;
 
 
     @Override
@@ -35,83 +40,58 @@ public class GitProfileActivity extends AppCompatActivity {
 
         tvLogin = (TextView) findViewById(R.id.tv_git_userName);
         tvName = (TextView) findViewById(R.id.tv_git_name);
-        ivAvatar = (ImageView) findViewById(R.id.iv_git_avatar);
-
-        userName = getIntent().getStringExtra(MainActivity.EXTRA_GIT_LOGIN);
-        GitTask personTask = new GitTask();
-        personTask.execute(userName);
+        ivAvatar = (CircleImageView) findViewById(R.id.iv_git_avatar);
+        btnGitHub = (Button) findViewById(R.id.btn_github);
+        Intent intent = getIntent();
+        if (intent.hasExtra(MainActivity.EXTRA_GIT_LOGIN)) {
+            userName = intent.getStringExtra(MainActivity.EXTRA_GIT_LOGIN);
+        } else if (intent.getData().getHost().equals("github.com")) {
+            userName = intent.getData().getLastPathSegment();
+        }
+        if (userName != null) {
+            FetchGithubDataTask task = new FetchGithubDataTask(this);
+            task.execute(userName);
+        }
     }
 
-    public class GitTask extends AsyncTask<String, Void, Object[]> {
+    public void onGithubBtnClick(View view) {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/" + userName)));
+    }
 
+    public class FetchGithubDataTask extends AsyncTask<String, Void, String[]> {
 
+        private Context context;
+
+        FetchGithubDataTask(Context context) {
+            this.context = context;
+        }
 
         @Override
-        protected Object[] doInBackground(String... params) {
+        protected String[] doInBackground(String... params) {
 
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String[] resultStr = null;
-            Bitmap bmp = null;
-
+            final String BASE_URL = "https://api.github.com/users/" + params[0];
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder().url(BASE_URL).build();
             try {
-                final String BASE_URL = "https://api.github.com/users/" + params[0];
-                Uri builtUri = Uri.parse(BASE_URL).buildUpon().build();
-
-                URL url = new URL(builtUri.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    return null;
-                }
-                resultStr = getDataFromJson(buffer.toString());
-                url = new URL(resultStr[1]);
-                bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                Object[] resultObj = new Object[3];
-                resultObj[0] = resultStr[0];
-                resultObj[1] = bmp;
-                resultObj[2] = resultStr[2];
-                return resultObj;
-
+                Response response = client.newCall(request).execute();
+                return getDataFromJson(response.body().string());
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
-
             return null;
         }
 
         @Override
-        protected void onPostExecute(Object[] resultObj) {
-            if (resultObj != null) {
+        protected void onPostExecute(String[] result) {
+            if (result != null) {
                 tvLogin.setText(userName);
-                tvName.setText(resultObj[0].toString());
-                gitLink = resultObj[2].toString();
-                ivAvatar.setImageBitmap((Bitmap) resultObj[1]);
-                }
+                tvName.setText(result[0]);
+                gitLink = result[2];
+                Picasso.with(context).load(result[1]).into(ivAvatar);
+                btnGitHub.setVisibility(View.VISIBLE);
+                } else {
+                Toast.makeText(context, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+            }
             }
         }
 
