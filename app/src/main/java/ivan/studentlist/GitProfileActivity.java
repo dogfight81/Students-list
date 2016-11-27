@@ -1,10 +1,8 @@
 package ivan.studentlist;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -13,17 +11,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
 
 public class GitProfileActivity extends AppCompatActivity {
 
@@ -35,6 +33,14 @@ public class GitProfileActivity extends AppCompatActivity {
     public ProgressBar pbLoading;
 
     private HeadsetReceiver receiver;
+    private final String BASE_URL = "https://api.github.com";
+    private Gson gson = new GsonBuilder().create();
+    private Retrofit client = new Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(BASE_URL)
+            .build();
+
+    private GitApiInterface service = client.create(GitApiInterface.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +66,33 @@ public class GitProfileActivity extends AppCompatActivity {
             userName = intent.getData().getLastPathSegment();
         }
         if (userName != null) {
-            FetchGithubDataTask task = new FetchGithubDataTask(this);
-            task.execute(userName);
+            Call<GitHubUser> call = service.getUser(userName);
+            call.enqueue(new Callback<GitHubUser>() {
+                @Override
+                public void onResponse(Call<GitHubUser> call, retrofit2.Response<GitHubUser> response) {
+                    if (response.isSuccessful()) {
+                        GitHubUser user = response.body();
+                        tvLogin.setText(userName);
+                        tvName.setText(user.getName());
+                        tvLocation. setText("Location: " + user.getLocation());
+                        tvRepos.setText("repositories: " + user.getPublicRepos());
+                        tvEmail.setText("email: " + user.getEmail());
+                        gitLink = user.getHtmlUrl();
+                        Picasso.with(GitProfileActivity.this).load(user.getAvatarUrl()).into(ivAvatar);
+                        btnGitHub.setVisibility(View.VISIBLE);
+                        pbLoading.setVisibility(View.INVISIBLE);
+                    } else {
+                        Toast.makeText(GitProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<GitHubUser> call, Throwable t) {
+                    Toast.makeText(GitProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+                }
+            });
         }
+
     }
 
     @Override
@@ -82,75 +112,10 @@ public class GitProfileActivity extends AppCompatActivity {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(gitLink)));
     }
 
-    public class FetchGithubDataTask extends AsyncTask<String, Void, String[]> {
 
-        private Context context;
-
-        FetchGithubDataTask(Context context) {
-            this.context = context;
-        }
-
-        @Override
-        protected String[] doInBackground(String... params) {
-
-            final String BASE_URL = "https://api.github.com/users/" + params[0];
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url(BASE_URL).build();
-            try {
-                Response response = client.newCall(request).execute();
-                return getDataFromJson(response.body().string());
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String[] result) {
-            if (result != null) {
-                tvLogin.setText(userName);
-                tvName.setText(result[0]);
-                tvLocation. setText("Location: " + result[3]);
-                tvRepos.setText("repositories: " + result[4]);
-                tvEmail.setText("email: " + result[5]);
-                gitLink = result[2];
-                Picasso.with(context).load(result[1]).into(ivAvatar);
-                btnGitHub.setVisibility(View.VISIBLE);
-                pbLoading.setVisibility(View.INVISIBLE);
-                } else {
-                Toast.makeText(context, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
-            }
-            }
-        }
-
-        private String[] getDataFromJson(String jsonStr) throws JSONException {
-            final String GIT_AVATAR_URL = "avatar_url";
-            final String GIT_NAME = "name";
-            final String GIT_HTML_URL = "html_url";
-            final String GIT_LOCATION = "location";
-            final String GIT_REPOS = "public_repos";
-            final String GIT_EMAIL = "email";
-            JSONObject personJson = new JSONObject(jsonStr);
-            String name = personJson.getString(GIT_NAME);
-            String link = personJson.getString(GIT_HTML_URL);
-            String imageURL = personJson.getString(GIT_AVATAR_URL);
-            String location = personJson.getString(GIT_LOCATION);
-            String repos = Integer.toString(personJson.getInt(GIT_REPOS));
-            String email = personJson.getString(GIT_EMAIL);
-            String[] resultStr = new String[6];
-            resultStr[0] = name;
-            resultStr[1] = imageURL;
-            resultStr[2] = link;
-            resultStr[3] = location;
-            resultStr[4] = repos;
-            resultStr[5] = email;
-
-            for (int i = 0; i < resultStr.length; i++) {
-                if (resultStr[i].equals("null")){
-                    resultStr[i] = "unknown";
-                }
-            }
-            return resultStr;
-        }
+    interface GitApiInterface {
+        @GET("/users/{username}")
+        Call<GitHubUser> getUser(@Path("username") String username);
+    }
 
 }

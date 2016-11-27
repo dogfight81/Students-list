@@ -1,13 +1,10 @@
 package ivan.studentlist;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -16,15 +13,14 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public class GoogleProfileActivity extends AppCompatActivity {
 
@@ -42,6 +38,14 @@ public class GoogleProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_profile);
 
+        final String apiKey = "AIzaSyCBsEZKMpc5b9pDcBDphHFpmcWKEyCwrOI";
+        final String BASE_URL = "https://www.googleapis.com";
+        Retrofit client = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(BASE_URL)
+                .build();
+        GoogleApiInteface service = client.create(GoogleApiInteface.class);
+
         receiver = new HeadsetReceiver();
 
         tvName = (TextView) findViewById(R.id.tv_google_name);
@@ -57,8 +61,27 @@ public class GoogleProfileActivity extends AppCompatActivity {
             googleId = intent.getData().getLastPathSegment();
         }
         if (googleId != null) {
-            FetchGoogleDataTask task = new FetchGoogleDataTask(this);
-            task.execute(googleId);
+            Call<GoogleUser> call = service.getUser(googleId, apiKey);
+            call.enqueue(new Callback<GoogleUser>() {
+                @Override
+                public void onResponse(Call<GoogleUser> call, retrofit2.Response<GoogleUser> response) {
+                    if (response.isSuccessful()) {
+                        GoogleUser user = response.body();
+                        tvName.setText(user.getDisplayName());
+                        tvBirthday.setText("birthday: " + user.getBirthday());
+                        Picasso.with(GoogleProfileActivity.this).load(user.getImage().getUrl()).into(ivAvatar);
+                        btnGoogle.setVisibility(View.VISIBLE);
+                        pbLoading.setVisibility(View.INVISIBLE);
+                    } else {
+                        Toast.makeText(GoogleProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<GoogleUser> call, Throwable t) {
+                    Toast.makeText(GoogleProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+                }
+            });
         }
 
     }
@@ -80,72 +103,10 @@ public class GoogleProfileActivity extends AppCompatActivity {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://plus.google.com/u/0/" + googleId)));
     }
 
-    public class FetchGoogleDataTask extends AsyncTask<String, Void, String[]> {
+    interface GoogleApiInteface {
+        @GET("/plus/v1/people/{userID}")
+        Call<GoogleUser> getUser(@Path("userID") String userId, @Query("key") String apiKey);
 
-        private Context context;
-
-        FetchGoogleDataTask(Context context) {
-            this.context = context;
-        }
-
-        @Override
-        protected String[] doInBackground(String... params) {
-            String apiKey = "AIzaSyCBsEZKMpc5b9pDcBDphHFpmcWKEyCwrOI";
-            final String BASE_URL = "https://www.googleapis.com/plus/v1/people/" + params[0];
-            final String APIKEY_PARAM = "key";
-            Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                    .appendQueryParameter(APIKEY_PARAM, apiKey)
-                    .build();
-
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url(builtUri.toString()).build();
-            try {
-                Response response = client.newCall(request).execute();
-                return getDataFromJson(response.body().string());
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String[] result) {
-            super.onPostExecute(result);
-            if (result != null) {
-                tvName.setText(result[0]);
-                tvBirthday.setText("birthday: " + result[3]);
-                Picasso.with(context).load(result[2]).into(ivAvatar);
-                btnGoogle.setVisibility(View.VISIBLE);
-                pbLoading.setVisibility(View.INVISIBLE);
-            } else {
-                Toast.makeText(context, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
-            }
-        }
-
-        private String[] getDataFromJson(String jsonStr) throws JSONException {
-            final String G_DISPLAYNAME = "displayName";
-            final String G_URL = "url";
-            final String G_IMAGE_OBJECT = "image";
-            final String G_IMAGE_URL = "url";
-            final String G_BIRTHDAY = "birthday";
-            Log.d(TAG, jsonStr);
-            JSONObject personJson = new JSONObject(jsonStr);
-            String name = personJson.getString(G_DISPLAYNAME);
-            String url = personJson.getString(G_URL);
-            String birthday;
-            if (personJson.has(G_BIRTHDAY)) {
-                birthday = personJson.getString(G_BIRTHDAY);
-            } else {
-                birthday = "unknown";
-            }
-            JSONObject image = personJson.getJSONObject(G_IMAGE_OBJECT);
-            String imageURL = image.getString(G_IMAGE_URL);
-            String[] result = new String[4];
-            result[0] = name;
-            result[1] = url;
-            result[2] = imageURL;
-            result[3] = birthday;
-            return result;
-        }
     }
+
 }
