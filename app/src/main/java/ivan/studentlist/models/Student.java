@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.models;
 
 public class Student {
 

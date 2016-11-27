@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.activities;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -14,6 +14,9 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import ivan.studentlist.models.GoogleUser;
+import ivan.studentlist.receivers.HeadsetReceiver;
+import ivan.studentlist.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;

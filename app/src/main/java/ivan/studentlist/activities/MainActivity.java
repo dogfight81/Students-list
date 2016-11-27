@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.activities;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,6 +11,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import ivan.studentlist.receivers.HeadsetReceiver;
+import ivan.studentlist.R;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
@@ -80,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 break;
             case R.id.item_photo:
                 startActivity(new Intent(this, PhotoActivity.class));
+                break;
+            case R.id.item_contacts:
+                startActivity(new Intent(this, ContactsActivity.class));
                 break;
         }
 

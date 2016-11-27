@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

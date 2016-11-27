@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

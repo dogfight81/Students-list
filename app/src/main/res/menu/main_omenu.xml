@@ -2,10 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="go to recycler"
+        android:title="recycler"
         android:id="@+id/item_recycler"/>
     <item
-        android:title="go to PhotoActivity"
+        android:title="PhotoActivity"
         android:id="@+id/item_photo"/>
+    <item
+        android:title="ContacsActivity"
+        android:id="@+id/item_contacts"/>
 
 </menu>

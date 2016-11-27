@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.activities;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,6 +10,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+
+import ivan.studentlist.receivers.HeadsetReceiver;
+import ivan.studentlist.R;
+import ivan.studentlist.adapters.RecyclerAdapter;
+import ivan.studentlist.models.Student;
 
 public class RecyclerActivity extends AppCompatActivity {
 

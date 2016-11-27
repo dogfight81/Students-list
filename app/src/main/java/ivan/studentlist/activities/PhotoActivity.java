@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import ivan.studentlist.R;
 
 public class PhotoActivity extends AppCompatActivity {
 

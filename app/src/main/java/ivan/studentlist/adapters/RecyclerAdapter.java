@@ -1,4 +1,4 @@
-package ivan.studentlist;
+package ivan.studentlist.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,8 +12,14 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ivan.studentlist.R;
+import ivan.studentlist.activities.GitProfileActivity;
+import ivan.studentlist.activities.GoogleProfileActivity;
+import ivan.studentlist.activities.MainActivity;
+import ivan.studentlist.models.Student;
 
-class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
+
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
     private LayoutInflater inflater;
     private Context context;
@@ -21,7 +27,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
 
 
-    RecyclerAdapter(Context context, ArrayList<Student> list) {
+    public RecyclerAdapter(Context context, ArrayList<Student> list) {
         this.context = context;
         inflater = LayoutInflater.from(context);
         studentsList = list;
