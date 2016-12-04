@@ -3,7 +3,8 @@
     package="ivan.studentlist">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -46,7 +47,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.PhotoActivity" />
-        <activity android:name=".activities.ContactsActivity"></activity>
+        <activity android:name=".activities.ContactsActivity" />
     </application>
 
 </manifest>
