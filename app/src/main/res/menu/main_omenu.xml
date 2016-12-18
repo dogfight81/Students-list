@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:title="recycler"
-        android:id="@+id/item_recycler"/>
+
     <item
         android:title="PhotoActivity"
         android:id="@+id/item_photo"/>
     <item
         android:title="ContacsActivity"
         android:id="@+id/item_contacts"/>
+    <item
+        android:title="search"
+        android:id="@+id/action_search"
+        android:icon="@android:drawable/ic_menu_search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
+
 
 </menu>

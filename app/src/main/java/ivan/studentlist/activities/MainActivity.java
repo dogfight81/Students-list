@@ -3,48 +3,76 @@ package ivan.studentlist.activities;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-import ivan.studentlist.receivers.HeadsetReceiver;
+import java.util.ArrayList;
+import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
 import ivan.studentlist.R;
+import ivan.studentlist.adapters.StudentsAdapter;
+import ivan.studentlist.models.Student;
+import ivan.studentlist.receivers.HeadsetReceiver;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity {
 
-    public static final String TAG = "myTag";
+    private String TAG = "tag";
+
     public static final String EXTRA_GIT_LOGIN = "gitLogin";
     public static final String  EXTRA_GOOGLE_ID = "googleID";
-
-    private ListView lvStudents;
-    private String[] gitLogins;
-    private String[] googleIds;
-
     private HeadsetReceiver receiver;
+    private Realm realm;
+    private RealmResults<Student> studentRealmResults;
+    private StudentsAdapter studentsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         receiver = new HeadsetReceiver();
+        RecyclerView rvStudents = (RecyclerView) findViewById(R.id.rv_students);
+        studentsAdapter = new StudentsAdapter(this, null);
+        rvStudents.setAdapter(studentsAdapter);
 
-        String[] names = getResources().getStringArray(R.array.Names);
 
-        lvStudents = (ListView) findViewById(R.id.lv_students);
+        realm = Realm.getDefaultInstance();
+        studentRealmResults = realm.where(Student.class).findAllAsync();
+        studentRealmResults.addChangeListener(new RealmChangeListener<RealmResults<Student>>() {
+            @Override
+            public void onChange(RealmResults<Student> element) {
+                Log.d(TAG, "onChange: ");
+                if (element.isEmpty()) {
+                    String[] names = getResources().getStringArray(R.array.Names);
+                    String[] gitLogins = getResources().getStringArray(R.array.GitLogins);
+                    String[] googleIds = getResources().getStringArray(R.array.GoogleIDs);
+                    List<Student> studentsList = new ArrayList<>();
+                    for (int i = 0; i < names.length; i++) {
+                        studentsList.add(new Student(i, names[i], gitLogins[i], googleIds[i]));
+                    }
+                    saveStudentsToRealm(studentsList);
+                    studentsAdapter.swapData(studentsList);
+                } else {
+                    studentsAdapter.swapData(element);
+                }
+            }
+        });
 
-        gitLogins = getResources().getStringArray(R.array.GitLogins);
-        googleIds = getResources().getStringArray(R.array.GoogleIDs);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item, R.id.tv_name, names);
-        lvStudents.setAdapter(adapter);
-        lvStudents.setOnItemClickListener(this);
 
+
+        rvStudents.setLayoutManager(new LinearLayoutManager(this));
+        rvStudents.setAdapter(studentsAdapter);
     }
 
     @Override
@@ -61,26 +89,34 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG, "onItemClick: " + position);
-        Intent intent = new Intent(this, GoogleProfileActivity.class);
-        intent.putExtra(EXTRA_GOOGLE_ID, googleIds[position]);
-        startActivity(intent);
+    protected void onDestroy() {
+        realm.close();
+        super.onDestroy();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_omenu, menu);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                studentRealmResults = realm.where(Student.class).contains("searchName", newText.toLowerCase()).findAll();
+                studentsAdapter.swapData(studentRealmResults);
+                return false;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
-            case R.id.item_recycler:
-                startActivity(new Intent(this, RecyclerActivity.class));
-                break;
             case R.id.item_photo:
                 startActivity(new Intent(this, PhotoActivity.class));
                 break;
@@ -88,18 +124,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 startActivity(new Intent(this, ContactsActivity.class));
                 break;
         }
-
-
         return super.onOptionsItemSelected(item);
     }
 
-    public void onGitBtnClick(View view) {
-        int position = lvStudents.getPositionForView((View) view.getParent());
-        Log.d(TAG, "onGitBtnClick: " + position);
-        Intent intent = new Intent(this, GitProfileActivity.class);
-        intent.putExtra(EXTRA_GIT_LOGIN, gitLogins[position]);
-        startActivity(intent);
+    private void saveStudentsToRealm(final List<Student> data){
+        realm.beginTransaction();
+        realm.commitTransaction();
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.insertOrUpdate(data);
+            }
+        });
     }
-
 
 }
