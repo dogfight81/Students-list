@@ -51,5 +51,26 @@
         android:layout_gravity="center"
         android:indeterminate="true"/>
 
+    <LinearLayout
+        android:id="@+id/ll_retry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/error.toast.loading"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="retry"
+            android:layout_gravity="center"
+            android:onClick="onRetryBtnClick"/>
+
+    </LinearLayout>
 
 </FrameLayout>

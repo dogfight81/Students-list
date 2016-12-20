@@ -6,9 +6,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +33,8 @@ public class GoogleProfileActivity extends AppCompatActivity {
 
     public TextView tvName, tvBirthday;
     public CircleImageView ivAvatar;
+    private LinearLayout llRetry;
+
     public String googleId;
     public Button btnGoogle;
     public ProgressBar pbLoading;
@@ -48,16 +52,14 @@ public class GoogleProfileActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        final String apiKey = "AIzaSyBtzmfBaptMc3S4Ynabdx2CZZ9fax0TW7c";
-        final String BASE_URL = "https://www.googleapis.com";
-        Retrofit client = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(BASE_URL)
-                .build();
-        GoogleApiInteface service = client.create(GoogleApiInteface.class);
+
+
+
 
         receiver = new HeadsetReceiver();
 
+        llRetry = (LinearLayout)findViewById(R.id.ll_retry);
+        llRetry.setVisibility(View.INVISIBLE);
         tvName = (TextView) findViewById(R.id.tv_google_name);
         tvBirthday = (TextView) findViewById(R.id.tv_birthday);
         ivAvatar = (CircleImageView) findViewById(R.id.iv_google_avatar);
@@ -71,27 +73,7 @@ public class GoogleProfileActivity extends AppCompatActivity {
             googleId = intent.getData().getLastPathSegment();
         }
         if (googleId != null) {
-            Call<GoogleUser> call = service.getUser(googleId, apiKey);
-            call.enqueue(new Callback<GoogleUser>() {
-                @Override
-                public void onResponse(Call<GoogleUser> call, retrofit2.Response<GoogleUser> response) {
-                    if (response.isSuccessful()) {
-                        GoogleUser user = response.body();
-                        tvName.setText(user.getDisplayName());
-                        tvBirthday.setText("birthday: " + user.getBirthday());
-                        Picasso.with(GoogleProfileActivity.this).load(user.getImage().getUrl()).into(ivAvatar);
-                        btnGoogle.setVisibility(View.VISIBLE);
-                        pbLoading.setVisibility(View.INVISIBLE);
-                    } else {
-                        Toast.makeText(GoogleProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<GoogleUser> call, Throwable t) {
-                    Toast.makeText(GoogleProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
-                }
-            });
+            loadData();
         }
 
     }
@@ -123,10 +105,58 @@ public class GoogleProfileActivity extends AppCompatActivity {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://plus.google.com/u/0/" + googleId)));
     }
 
+    public void onRetryBtnClick(View view) {
+        llRetry.setVisibility(View.INVISIBLE);
+        loadData();
+    }
+
     interface GoogleApiInteface {
         @GET("/plus/v1/people/{userID}")
         Call<GoogleUser> getUser(@Path("userID") String userId, @Query("key") String apiKey);
 
+    }
+
+    private void loadData() {
+
+        pbLoading.setVisibility(View.VISIBLE);
+
+        final String BASE_URL = "https://www.googleapis.com";
+        Retrofit client = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(BASE_URL)
+                .build();
+
+        final String apiKey = "AIzaSyBC0oTTVSVQeC9_tNlTD6k8QuU6c2Hg9nI";
+        GoogleApiInteface service = client.create(GoogleApiInteface.class);
+
+        Call<GoogleUser> call = service.getUser(googleId, apiKey);
+        call.enqueue(new Callback<GoogleUser>() {
+            @Override
+            public void onResponse(Call<GoogleUser> call, retrofit2.Response<GoogleUser> response) {
+                Log.d(TAG, "onResponse: " + response.isSuccessful());
+                if (response.isSuccessful()) {
+                    GoogleUser user = response.body();
+                    tvName.setText(user.getDisplayName());
+                    tvBirthday.setText("birthday: " + user.getBirthday());
+                    Picasso.with(GoogleProfileActivity.this).load(user.getImage().getUrl()).into(ivAvatar);
+                    btnGoogle.setVisibility(View.VISIBLE);
+                    pbLoading.setVisibility(View.INVISIBLE);
+                } else {
+                    Toast.makeText(GoogleProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "onResponse: " + response.message());
+                    pbLoading.setVisibility(View.INVISIBLE);
+                    llRetry.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GoogleUser> call, Throwable t) {
+                Toast.makeText(GoogleProfileActivity.this, R.string.error_toast_loading, Toast.LENGTH_LONG).show();
+                Log.d(TAG, "onFailure: " + t.getMessage());
+                pbLoading.setVisibility(View.INVISIBLE);
+                llRetry.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
 }

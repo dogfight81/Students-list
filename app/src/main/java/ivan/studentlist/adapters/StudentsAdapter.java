@@ -67,7 +67,11 @@ public class StudentsAdapter extends RecyclerView.Adapter<StudentsAdapter.Studen
 
     @Override
     public int getItemCount() {
-        return studentsList.size();
+        if (studentsList != null) {
+            return studentsList.size();
+        } else {
+            return 0;
+        }
     }
 
     public void swapData(List<Student> newData) {
