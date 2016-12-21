@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 studentRealmResults = realm.where(Student.class).contains("searchName", newText.toLowerCase()).findAll();
+                studentsAdapter.setQueryText(newText.toLowerCase());
                 studentsAdapter.swapData(studentRealmResults);
                 return false;
             }
